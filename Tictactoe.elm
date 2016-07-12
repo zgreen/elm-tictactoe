@@ -232,7 +232,7 @@ view model =
       [ h1 [] [ text "Tic Tac Toe" ]
       , h2 [ style [("display", if model.gameIsOver then "block" else "none")] ] [ text (displayWinnerMessage model.plays) ]
       , button [ style [("background-color", "transparent"), ("font", "700 3rem/1 sans-serif"), ("padding", "0.5em 1em"), ("border", "3px solid white"), ("color", "white"), ("cursor", "pointer")], onClick NewGame ] [ text (playMessage model.gameIsOver) ]
-      , h2 [] [ text "Written in Elm." ]
+      , h2 [] [ text "Written in ", a [ href "http://elm-lang.org/", style [("color", "white")] ] [ text "Elm." ] ]
       , p [] [ a [ href "https://github.com/zgreen/elm-tictactoe", style [("color", "white")] ] [ text "View on Github" ] ]
       , p [] [ a [ href "https://twitter.com/zgreen_", style [("color", "white")] ] [ text "By @zgreen_" ] ] ]
     , div [ style [("display", if model.showDebugInfo then "block" else "none"), ("font-family", "monospace")] ] [
