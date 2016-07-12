@@ -421,7 +421,22 @@ var _user$project$Main$view = function (model) {
 							[]),
 						_elm_lang$core$Native_List.fromArray(
 							[
-								_elm_lang$html$Html$text('Written in Elm.')
+								_elm_lang$html$Html$text('Written in '),
+								A2(
+								_elm_lang$html$Html$a,
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html_Attributes$href('http://elm-lang.org/'),
+										_elm_lang$html$Html_Attributes$style(
+										_elm_lang$core$Native_List.fromArray(
+											[
+												{ctor: '_Tuple2', _0: 'color', _1: 'white'}
+											]))
+									]),
+								_elm_lang$core$Native_List.fromArray(
+									[
+										_elm_lang$html$Html$text('Elm.')
+									]))
 							])),
 						A2(
 						_elm_lang$html$Html$p,
