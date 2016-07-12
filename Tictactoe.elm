@@ -1,6 +1,6 @@
 import Basics exposing (..)
 import List exposing (append, repeat, indexedMap)
-import Html exposing (h1, h2, div, button, input, text)
+import Html exposing (h1, h2, div, button, input, text, a, p)
 import Html.Attributes exposing (..)
 import Html.App as App
 import Html.Events exposing (onClick)
@@ -232,7 +232,9 @@ view model =
       [ h1 [] [ text "Tic Tac Toe" ]
       , h2 [ style [("display", if model.gameIsOver then "block" else "none")] ] [ text (displayWinnerMessage model.plays) ]
       , button [ style [("background-color", "transparent"), ("font", "700 3rem/1 sans-serif"), ("padding", "0.5em 1em"), ("border", "3px solid white"), ("color", "white"), ("cursor", "pointer")], onClick NewGame ] [ text (playMessage model.gameIsOver) ]
-      , h2 [] [ text "Written in Elm." ] ]
+      , h2 [] [ text "Written in Elm." ]
+      , p [] [ a [ href "https://github.com/zgreen/elm-tictactoe", style [("color", "white")] ] [ text "View on Github" ] ]
+      , p [] [ a [ href "https://twitter.com/zgreen_", style [("color", "white")] ] [ text "By @zgreen_" ] ] ]
     , div [ style [("display", if model.showDebugInfo then "block" else "none"), ("font-family", "monospace")] ] [
       button [ onClick NewGame ] [ text "New Game" ]
       , div [] [ text ("is X move: " ++ toString model.isXMove) ]
