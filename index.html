@@ -7624,6 +7624,31 @@ var _elm_lang$html$Html_Events$Options = F2(
 	function (a, b) {
 		return {stopPropagation: a, preventDefault: b};
 	});
+var _user$project$Main$startScreenStyles = function (isVisible) {
+	return _elm_lang$core$Native_List.fromArray(
+		[
+			{ctor: '_Tuple2', _0: 'flex-direction', _1: 'column'},
+			{ctor: '_Tuple2', _0: 'justify-content', _1: 'center'},
+			{ctor: '_Tuple2', _0: 'align-items', _1: 'center'},
+			{ctor: '_Tuple2', _0: 'background-color', _1: 'black'},
+			{ctor: '_Tuple2', _0: 'color', _1: 'white'},
+			{ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
+			{ctor: '_Tuple2', _0: 'height', _1: '100vh'},
+			{ctor: '_Tuple2', _0: 'width', _1: '100vw'},
+			{ctor: '_Tuple2', _0: 'display', _1: 'flex'},
+			{
+			ctor: '_Tuple2',
+			_0: 'pointer-events',
+			_1: _elm_lang$core$Basics$not(isVisible) ? 'none' : 'auto'
+		},
+			{
+			ctor: '_Tuple2',
+			_0: 'opacity',
+			_1: _elm_lang$core$Basics$not(isVisible) ? '0' : '0.8'
+		},
+			{ctor: '_Tuple2', _0: 'transition', _1: 'opacity 0.3s ease'}
+		]);
+};
 var _user$project$Main$playMessage = function (gameIsOver) {
 	return gameIsOver ? 'Play again?' : 'Play.';
 };
@@ -7643,10 +7668,13 @@ var _user$project$Main$checkDiagonal = function (axes) {
 };
 var _user$project$Main$getUnzippedDiagonal = F2(
 	function (list, checkXAxis) {
-		return A2(
+		return (A2(
 			_elm_lang$core$List$member,
 			{ctor: '_Tuple2', _0: 0, _1: 0},
-			list) ? (checkXAxis ? _elm_lang$core$Basics$fst(
+			list) || A2(
+			_elm_lang$core$List$member,
+			{ctor: '_Tuple2', _0: 2, _1: 2},
+			list)) ? (checkXAxis ? _elm_lang$core$Basics$fst(
 			_elm_lang$core$List$unzip(
 				A2(_elm_lang$core$List$filter, _user$project$Main$checkZeroZeroDiagonal, list))) : _elm_lang$core$Basics$snd(
 			_elm_lang$core$List$unzip(
@@ -7721,8 +7749,11 @@ var _user$project$Main$determineWinner = function (playerMoves) {
 };
 var _user$project$Main$gameIsOver = function (playerMoves) {
 	return _elm_lang$core$Basics$fst(
-		_user$project$Main$determineWinner(playerMoves)) || _elm_lang$core$Basics$snd(
-		_user$project$Main$determineWinner(playerMoves));
+		_user$project$Main$determineWinner(playerMoves)) || (_elm_lang$core$Basics$snd(
+		_user$project$Main$determineWinner(playerMoves)) || _elm_lang$core$Native_Utils.eq(
+		_elm_lang$core$List$length(
+			A2(_elm_lang$core$List$append, playerMoves.x, playerMoves.o)),
+		9));
 };
 var _user$project$Main$displayWinnerMessage = function (plays) {
 	return _elm_lang$core$Basics$fst(
@@ -7777,60 +7808,64 @@ var _user$project$Main$update = F2(
 			case 'MakeMove':
 				var _p2 = _p0._1._0;
 				var _p1 = _p0._1._1;
-				if (_elm_lang$core$Basics$fst(
-					_user$project$Main$determineWinner(model.plays))) {
+				if (A2(
+					_elm_lang$core$List$member,
+					{ctor: '_Tuple2', _0: _p2, _1: _p1},
+					A2(_elm_lang$core$List$append, model.plays.x, model.plays.o))) {
 					return _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							gameIsOver: true,
-							lastMove: {ctor: '_Tuple2', _0: _p2, _1: _p1},
-							winner: {x: true, o: false},
-							startScreenVisible: true
+							winner: {x: false, o: false}
 						});
 				} else {
-					if (_elm_lang$core$Basics$snd(
+					if (_elm_lang$core$Basics$fst(
 						_user$project$Main$determineWinner(model.plays))) {
 						return _elm_lang$core$Native_Utils.update(
 							model,
 							{
 								gameIsOver: true,
-								lastMove: {ctor: '_Tuple2', _0: _p2, _1: _p1},
-								winner: {x: false, o: true},
+								winner: {x: true, o: false},
 								startScreenVisible: true
 							});
 					} else {
-						if (_elm_lang$core$Native_Utils.cmp(
-							_elm_lang$core$List$length(
-								A2(_elm_lang$core$List$append, model.plays.x, model.plays.o)),
-							model.totalSpaces) < 1) {
-							var plays = A3(
-								_user$project$Main$makePlay,
-								model.plays,
-								model.isXMove,
-								{ctor: '_Tuple2', _0: _p2, _1: _p1});
-							return _elm_lang$core$Native_Utils.update(
-								model,
-								{
-									isXMove: _elm_lang$core$Basics$not(model.isXMove),
-									plays: plays,
-									lastMove: {ctor: '_Tuple2', _0: _p2, _1: _p1},
-									winner: {
-										x: _elm_lang$core$Basics$fst(
-											_user$project$Main$determineWinner(plays)),
-										o: _elm_lang$core$Basics$snd(
-											_user$project$Main$determineWinner(plays))
-									},
-									gameIsOver: _user$project$Main$gameIsOver(plays),
-									startScreenVisible: _user$project$Main$gameIsOver(plays)
-								});
-						} else {
+						if (_elm_lang$core$Basics$snd(
+							_user$project$Main$determineWinner(model.plays))) {
 							return _elm_lang$core$Native_Utils.update(
 								model,
 								{
 									gameIsOver: true,
-									lastMove: {ctor: '_Tuple2', _0: _p2, _1: _p1},
+									winner: {x: false, o: true},
 									startScreenVisible: true
 								});
+						} else {
+							if (_elm_lang$core$Native_Utils.cmp(
+								_elm_lang$core$List$length(
+									A2(_elm_lang$core$List$append, model.plays.x, model.plays.o)),
+								model.totalSpaces) < 1) {
+								var plays = A3(
+									_user$project$Main$makePlay,
+									model.plays,
+									model.isXMove,
+									{ctor: '_Tuple2', _0: _p2, _1: _p1});
+								return _elm_lang$core$Native_Utils.update(
+									model,
+									{
+										isXMove: _elm_lang$core$Basics$not(model.isXMove),
+										plays: plays,
+										winner: {
+											x: _elm_lang$core$Basics$fst(
+												_user$project$Main$determineWinner(plays)),
+											o: _elm_lang$core$Basics$snd(
+												_user$project$Main$determineWinner(plays))
+										},
+										gameIsOver: _user$project$Main$gameIsOver(plays),
+										startScreenVisible: _user$project$Main$gameIsOver(plays)
+									});
+							} else {
+								return _elm_lang$core$Native_Utils.update(
+									model,
+									{gameIsOver: true, startScreenVisible: true});
+							}
 						}
 					}
 				}
@@ -7848,8 +7883,7 @@ var _user$project$Main$update = F2(
 						},
 						winner: {x: false, o: false},
 						totalSpaces: 9,
-						startScreenVisible: false,
-						lastMove: {ctor: '_Tuple2', _0: -1, _1: -1}
+						startScreenVisible: false
 					});
 			default:
 				return _elm_lang$core$Native_Utils.update(
@@ -7869,8 +7903,7 @@ var _user$project$Main$model = {
 	winner: {x: false, o: false},
 	totalSpaces: 9,
 	startScreenVisible: true,
-	showDebugInfo: false,
-	lastMove: {ctor: '_Tuple2', _0: -1, _1: -1}
+	showDebugInfo: false
 };
 var _user$project$Main$Plays = F2(
 	function (a, b) {
@@ -7880,9 +7913,9 @@ var _user$project$Main$Winner = F2(
 	function (a, b) {
 		return {x: a, o: b};
 	});
-var _user$project$Main$Model = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {isXMove: a, gameIsOver: b, moveMade: c, plays: d, winner: e, totalSpaces: f, startScreenVisible: g, showDebugInfo: h, lastMove: i};
+var _user$project$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {isXMove: a, gameIsOver: b, moveMade: c, plays: d, winner: e, totalSpaces: f, startScreenVisible: g, showDebugInfo: h};
 	});
 var _user$project$Main$ToggleDebugInfo = function (a) {
 	return {ctor: 'ToggleDebugInfo', _0: a};
@@ -7974,22 +8007,7 @@ var _user$project$Main$view = function (model) {
 				_elm_lang$core$Native_List.fromArray(
 					[
 						_elm_lang$html$Html_Attributes$style(
-						_elm_lang$core$Native_List.fromArray(
-							[
-								{ctor: '_Tuple2', _0: 'flex-direction', _1: 'column'},
-								{ctor: '_Tuple2', _0: 'justify-content', _1: 'center'},
-								{ctor: '_Tuple2', _0: 'align-items', _1: 'center'},
-								{ctor: '_Tuple2', _0: 'background-color', _1: 'black'},
-								{ctor: '_Tuple2', _0: 'color', _1: 'white'},
-								{ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
-								{ctor: '_Tuple2', _0: 'height', _1: '100vh'},
-								{ctor: '_Tuple2', _0: 'width', _1: '100vw'},
-								{
-								ctor: '_Tuple2',
-								_0: 'display',
-								_1: _elm_lang$core$Basics$not(model.startScreenVisible) ? 'none' : 'flex'
-							}
-							]))
+						_user$project$Main$startScreenStyles(model.startScreenVisible))
 					]),
 				_elm_lang$core$Native_List.fromArray(
 					[
@@ -8012,7 +8030,8 @@ var _user$project$Main$view = function (model) {
 										ctor: '_Tuple2',
 										_0: 'display',
 										_1: model.gameIsOver ? 'block' : 'none'
-									}
+									},
+										{ctor: '_Tuple2', _0: 'color', _1: 'gold'}
 									]))
 							]),
 						_elm_lang$core$Native_List.fromArray(
@@ -8177,82 +8196,6 @@ var _user$project$Main$view = function (model) {
 							[
 								_elm_lang$html$Html$text(
 								_elm_lang$core$Basics$toString(model.winner))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_elm_lang$core$List$unzip(
-										A2(_elm_lang$core$List$filter, _user$project$Main$checkDiagonal, model.plays.o))))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_elm_lang$core$List$unzip(model.plays.x)))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									A2(
-										_user$project$Main$checkStraight,
-										_elm_lang$core$Basics$fst(
-											_elm_lang$core$List$unzip(model.plays.x)),
-										1)))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_user$project$Main$getCurrentPlayerMoves(model.plays)))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(model.lastMove))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_user$project$Main$straightWin(
-										_user$project$Main$getCurrentPlayerMoves(model.plays))))
-							])),
-						A2(
-						_elm_lang$html$Html$div,
-						_elm_lang$core$Native_List.fromArray(
-							[]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_user$project$Main$straightWin(
-										_user$project$Main$getCurrentPlayerMoves(model.plays))))
 							]))
 					])),
 				A2(
