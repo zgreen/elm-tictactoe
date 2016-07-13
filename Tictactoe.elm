@@ -31,7 +31,6 @@ type alias Model =
   , totalSpaces: Int
   , startScreenVisible: Bool
   , showDebugInfo: Bool
-  , lastMove: (Int, Int)
   }
 
 model =
@@ -42,7 +41,6 @@ model =
   , totalSpaces = 9
   , startScreenVisible = True
   , showDebugInfo = False
-  , lastMove = (-1, -1)
   }
 
 -- Update
@@ -55,16 +53,16 @@ type Msg
 update msg model =
   case msg of
     MakeMove index (row, col) ->
-      if fst (determineWinner model.plays) then
+      if List.member (row, col) (List.append model.plays.x model.plays.o) then
+        { model | winner = { x = False, o = False } }
+      else if fst (determineWinner model.plays) then
         { model |
           gameIsOver = True
-          , lastMove = (row, col)
           , winner = { x = True, o = False }
           , startScreenVisible = True }
       else if snd (determineWinner model.plays) then
         { model |
           gameIsOver = True
-          , lastMove = (row, col)
           , winner = { x = False, o = True }
           , startScreenVisible = True }
       else if List.length (List.append model.plays.x model.plays.o) <= model.totalSpaces then
@@ -74,14 +72,12 @@ update msg model =
           { model |
             isXMove = not model.isXMove
             , plays = plays
-            , lastMove = (row, col)
             , winner = { x = fst (determineWinner plays), o = snd (determineWinner plays) }
             , gameIsOver = gameIsOver plays
             , startScreenVisible = gameIsOver plays }
       else
         { model |
           gameIsOver = True
-          , lastMove = (row, col)
           , startScreenVisible = True }
     NewGame ->
       { model |
@@ -91,7 +87,6 @@ update msg model =
         , winner = { x = False, o = False }
         , totalSpaces = 9
         , startScreenVisible = False
-        , lastMove = (-1, -1)
       }
     ToggleDebugInfo bool ->
       { model | showDebugInfo = bool }
@@ -109,7 +104,12 @@ makePlay plays isXMove spacePlayed =
 
 makeSquare index string =
   [ input [ value string
-  , style [ ("width", "calc(100%/3)"), ("box-sizing", "border-box"), ("cursor", "pointer"), ("height", "calc(100vh/3)"), ("text-align", "center"), ("font-size", "3em") ]
+  , style [ ("width", "calc(100%/3)")
+    , ("box-sizing", "border-box")
+    , ("cursor", "pointer")
+    , ("height", "calc(100vh/3)")
+    , ("text-align", "center")
+    , ("font-size", "3em") ]
   , onClick (MakeMove index (space index)) ] []
   ]
 
@@ -173,7 +173,7 @@ diagonalWin playerMoves checkXAxis =
     List.length (getUnzippedDiagonal playerMoves checkXAxis) == 3
 
 getUnzippedDiagonal list checkXAxis =
-  if List.member (0, 0) list then
+  if (List.member (0, 0) list) || (List.member (2,2) list) then
     if checkXAxis then
       fst (List.unzip (List.filter checkZeroZeroDiagonal list))
     else
@@ -210,7 +210,9 @@ determineWinner playerMoves =
     (False, False)
 
 gameIsOver playerMoves =
-  fst (determineWinner playerMoves) || snd (determineWinner playerMoves)
+  fst (determineWinner playerMoves) ||
+    snd (determineWinner playerMoves) ||
+    List.length (List.append playerMoves.x playerMoves.o) == 9
 
 displayWinnerMessage plays =
   if fst (determineWinner plays) then
@@ -226,12 +228,35 @@ playMessage gameIsOver =
   else
     "Play."
 
+startScreenStyles isVisible =
+  [ ("flex-direction", "column")
+  , ("justify-content", "center")
+  , ("align-items", "center")
+  , ("background-color", "black")
+  , ("color", "white")
+  , ("position", "absolute")
+  , ("height", "100vh")
+  , ("width", "100vw")
+  , ("display", "flex")
+  , ("pointer-events", if not isVisible then "none" else "auto")
+  , ("opacity", if not isVisible then "0" else "0.8")
+  , ("transition", "opacity 0.3s ease")
+  ]
+
 view model =
   div [ style [("font-family", "sans-serif")] ]
-    [ div [ style [("flex-direction", "column"), ("justify-content", "center"), ("align-items", "center"), ("background-color", "black"), ("color", "white"), ("position", "absolute"), ("height", "100vh"), ("width", "100vw"), ("display", if not model.startScreenVisible then "none" else "flex")] ]
+    [ div [ style (startScreenStyles model.startScreenVisible) ]
       [ h1 [] [ text "Tic Tac Toe" ]
-      , h2 [ style [("display", if model.gameIsOver then "block" else "none")] ] [ text (displayWinnerMessage model.plays) ]
-      , button [ style [("background-color", "transparent"), ("font", "700 3rem/1 sans-serif"), ("padding", "0.5em 1em"), ("border", "3px solid white"), ("color", "white"), ("cursor", "pointer")], onClick NewGame ] [ text (playMessage model.gameIsOver) ]
+      , h2 [ style [ ("display", if model.gameIsOver then "block" else "none")
+        , ("color", "gold")] ] [ text (displayWinnerMessage model.plays) ]
+      , button [ style [
+        ("background-color", "transparent")
+        , ("font", "700 3rem/1 sans-serif")
+        , ("padding", "0.5em 1em")
+        , ("border", "3px solid white")
+        , ("color", "white")
+        , ("cursor", "pointer") ]
+        , onClick NewGame ] [ text (playMessage model.gameIsOver) ]
       , h2 [] [ text "Written in ", a [ href "http://elm-lang.org/", style [("color", "white")] ] [ text "Elm." ] ]
       , p [] [ a [ href "https://github.com/zgreen/elm-tictactoe", style [("color", "white")] ] [ text "View on Github" ] ]
       , p [] [ a [ href "https://twitter.com/zgreen_", style [("color", "white")] ] [ text "By @zgreen_" ] ] ]
@@ -240,14 +265,7 @@ view model =
       , div [] [ text ("is X move: " ++ toString model.isXMove) ]
       , div [] [ text ("game is over: " ++ (toString model.gameIsOver)) ]
       , div [] [ text (toString model.plays) ]
-      , div [] [ text (toString model.winner) ]
-      , div [] [ text (toString (List.unzip (List.filter checkDiagonal model.plays.o))) ]
-      , div [] [ text (toString (List.unzip (model.plays.x))) ]
-      , div [] [ text (toString (checkStraight (fst (List.unzip model.plays.x)) 1)) ]
-      , div [] [ text (toString (getCurrentPlayerMoves model.plays)) ]
-      , div [] [ text (toString model.lastMove) ]
-      , div [] [ text (toString (straightWin (getCurrentPlayerMoves model.plays))) ]
-      , div [] [ text (toString (straightWin (getCurrentPlayerMoves model.plays))) ] ]
+      , div [] [ text (toString model.winner) ] ]
     , button [ style [("position", "absolute"), ("top", "0"), ("right", "0")]
       , (onClick (ToggleDebugInfo (not model.showDebugInfo))) ] [ text "Show debug info?" ]
     , div [ style [("display", "flex"), ("flex-wrap", "wrap")] ]
